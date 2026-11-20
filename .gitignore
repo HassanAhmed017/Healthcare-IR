@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.idea/
+.vscode/
+metastore_db/
+spark-warehouse/
+derby.log
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db
