@@ -13,3 +13,4 @@ derby.log
 *.log
 .DS_Store
 Thumbs.db
+.vs/
