@@ -1,3 +1,6 @@
 pyspark
 customtkinter
 pandas
+python-docx
+openpyxl
+pypdf
