@@ -1,6 +1,4 @@
-import csv
 import re
-from pathlib import Path
 
 
 def natural_key(value):
@@ -14,7 +12,6 @@ def build_positional_index(spark, docs):
     sc = spark.sparkContext
     rdd = sc.parallelize(list(docs.items()))
 
-                                                           
     term_positions = rdd.flatMap(
         lambda doc: [
             ((word, doc[0]), position)
@@ -22,30 +19,25 @@ def build_positional_index(spark, docs):
         ]
     )
 
-                                                             
     grouped_positions = term_positions.groupByKey().mapValues(
         lambda positions: sorted(list(positions))
     )
 
-                                                  
     term_documents = grouped_positions.map(
         lambda item: (item[0][0], (item[0][1], item[1]))
     )
 
-                                         
     grouped_documents = term_documents.groupByKey()
 
-                                       
     collected = grouped_documents.collect()
 
-                                      
     index = {}
 
     for term, postings in sorted(collected, key=lambda item: item[0]):
         index[term] = {}
 
         for doc_id, positions in sorted(
-            postings, key=lambda item: natural_key(item[0])
+                postings, key=lambda item: natural_key(item[0])
         ):
             index[term][doc_id] = positions
 
@@ -56,12 +48,13 @@ def format_postings(postings):
     parts = []
 
     for doc_id, positions in sorted(
-        postings.items(), key=lambda item: natural_key(item[0])
+            postings.items(), key=lambda item: natural_key(item[0])
     ):
         position_text = ", ".join(str(pos) for pos in positions)
         parts.append(f"{doc_id}: {position_text}")
 
     return "; ".join(parts)
+
 
 def index_to_rows(index):
     rows = []
@@ -73,16 +66,3 @@ def index_to_rows(index):
         rows.append((term, postings_text, df))
 
     return rows
-
-
-def save_index_csv(index, path="output/positional_index.csv"):
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-
-    with path.open("w", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file)
-
-        writer.writerow(["Term", "Postings", "DF"])
-
-        for term, postings_text, df in index_to_rows(index):
-            writer.writerow([term, postings_text, df])
